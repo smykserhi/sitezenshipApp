@@ -37,7 +37,7 @@ export default function AudioMode() {
   const [accentFilter, setAccentFilter] = useState('All');
   const [rate, setRate] = useState<number>(0.9);
   const [pitch, setPitch] = useState<number>(1.0);
-  const [showSettings, setShowSettings] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
   const [status, setStatus] = useState<'idle' | 'speaking' | 'listening' | 'result'>('idle');
   const [transcript, setTranscript] = useState('');
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
