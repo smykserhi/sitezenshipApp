@@ -1,9 +1,18 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Card, CardContent, Typography, Button, LinearProgress, IconButton, FormControl, InputLabel, Select, MenuItem, Chip, Alert, SelectChangeEvent } from '@mui/material';
-import { Home, VolumeUp, Refresh } from '@mui/icons-material';
+import { Box, Card, CardContent, Typography, Button, LinearProgress, IconButton, FormControl, InputLabel, Select, MenuItem, Chip, Alert, SelectChangeEvent, Slider, Grid, Collapse, Divider, ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material';
+import { Home, VolumeUp, Refresh, Settings, PlayCircle } from '@mui/icons-material';
 import api from '../api';
 import { Question } from '@shared/index';
+
+const ACCENT_FILTERS: { label: string; langs: string[] }[] = [
+  { label: 'All', langs: [] },
+  { label: '🇺🇸 US', langs: ['en-US'] },
+  { label: '🇬🇧 UK', langs: ['en-GB'] },
+  { label: '🇦🇺 AU', langs: ['en-AU'] },
+  { label: '🇮🇳 IN', langs: ['en-IN'] },
+  { label: '🌍 Other EN', langs: ['en-'] },
+];
 
 function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - 0.5); }
 
@@ -25,6 +34,10 @@ export default function AudioMode() {
   const [loading, setLoading] = useState(true);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState('');
+  const [accentFilter, setAccentFilter] = useState('All');
+  const [rate, setRate] = useState<number>(0.9);
+  const [pitch, setPitch] = useState<number>(1.0);
+  const [showSettings, setShowSettings] = useState(true);
   const [status, setStatus] = useState<'idle' | 'speaking' | 'listening' | 'result'>('idle');
   const [transcript, setTranscript] = useState('');
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -40,7 +53,14 @@ export default function AudioMode() {
   useEffect(() => {
     const loadVoices = () => {
       const v = window.speechSynthesis.getVoices();
-      if (v.length) { setVoices(v); setSelectedVoice((prev) => prev || v[0]?.name || ''); }
+      if (v.length) {
+        setVoices(v);
+        // Default to first en-US voice
+        setSelectedVoice((prev) => {
+          if (prev) return prev;
+          return v.find((x) => x.lang === 'en-US')?.name ?? v[0]?.name ?? '';
+        });
+      }
     };
     loadVoices();
     window.speechSynthesis.onvoiceschanged = loadVoices;
@@ -52,10 +72,15 @@ export default function AudioMode() {
     const utter = new SpeechSynthesisUtterance(text);
     const voice = voices.find((v) => v.name === selectedVoice);
     if (voice) utter.voice = voice;
-    utter.rate = 0.9;
+    utter.rate = rate;
+    utter.pitch = pitch;
     utter.onend = () => resolve();
     window.speechSynthesis.speak(utter);
-  }), [voices, selectedVoice]);
+  }), [voices, selectedVoice, rate, pitch]);
+
+  const testVoice = () => {
+    speak('Hello! I am your USCIS interview officer. Are you ready to begin?');
+  };
 
   const listen = useCallback((): Promise<string> => new Promise((resolve) => {
     const SpeechRecognitionCtor = (window as typeof window & { webkitSpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition
@@ -142,21 +167,109 @@ export default function AudioMode() {
         <IconButton onClick={() => navigate('/')} size="small"><Home /></IconButton>
         <Typography variant="h6" sx={{ color: '#a855f7', fontWeight: 700, flexGrow: 1 }}>Audio Mode</Typography>
         <Chip label={`${score} correct`} size="small" sx={{ bgcolor: '#faf5ff', color: '#a855f7' }} />
+        <Tooltip title="Voice settings">
+          <IconButton size="small" onClick={() => setShowSettings((s) => !s)} sx={{ color: showSettings ? '#a855f7' : 'text.secondary' }}>
+            <Settings />
+          </IconButton>
+        </Tooltip>
       </Box>
       <Box sx={{ maxWidth: 700, mx: 'auto', p: 3 }}>
         {!hasSpeechRecognition && (
           <Alert severity="warning" sx={{ mb: 2 }}>Your browser does not support speech recognition. Try Chrome or Edge for the full experience.</Alert>
         )}
-        <Card sx={{ mb: 3 }}>
-          <CardContent>
-            <FormControl fullWidth size="small">
-              <InputLabel>Voice / Accent</InputLabel>
-              <Select value={selectedVoice} label="Voice / Accent" onChange={(e: SelectChangeEvent) => setSelectedVoice(e.target.value)}>
-                {voices.map((v) => <MenuItem key={v.name} value={v.name}>{v.name} ({v.lang})</MenuItem>)}
-              </Select>
-            </FormControl>
-          </CardContent>
-        </Card>
+        <Collapse in={showSettings}>
+          <Card sx={{ mb: 3, border: '1px solid #e9d5ff' }}>
+            <CardContent>
+              <Typography variant="subtitle2" color="#a855f7" fontWeight={700} gutterBottom>
+                🎙️ Voice Settings
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+
+              {/* Accent filter */}
+              <Typography variant="caption" color="text.secondary" gutterBottom display="block">
+                Filter by Accent
+              </Typography>
+              <ToggleButtonGroup
+                value={accentFilter}
+                exclusive
+                size="small"
+                onChange={(_e, val) => {
+                  if (!val) return;
+                  setAccentFilter(val);
+                  // Auto-select first matching voice
+                  const filter = ACCENT_FILTERS.find((f) => f.label === val);
+                  if (filter && filter.langs.length > 0) {
+                    const match = voices.find((v) => filter.langs.some((l) => v.lang.startsWith(l)));
+                    if (match) setSelectedVoice(match.name);
+                  }
+                }}
+                sx={{ flexWrap: 'wrap', gap: 0.5, mb: 2 }}
+              >
+                {ACCENT_FILTERS.map((f) => (
+                  <ToggleButton key={f.label} value={f.label} sx={{ fontSize: '0.75rem', px: 1.5, py: 0.5, borderRadius: '8px !important' }}>
+                    {f.label}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+
+              {/* Voice selector */}
+              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                <InputLabel>Voice</InputLabel>
+                <Select value={selectedVoice} label="Voice" onChange={(e: SelectChangeEvent) => setSelectedVoice(e.target.value)}>
+                  {voices
+                    .filter((v) => {
+                      const filter = ACCENT_FILTERS.find((f) => f.label === accentFilter);
+                      if (!filter || filter.langs.length === 0) return true;
+                      if (accentFilter === '🌍 Other EN') return v.lang.startsWith('en-') && !['en-US', 'en-GB', 'en-AU', 'en-IN'].includes(v.lang);
+                      return filter.langs.some((l) => v.lang.startsWith(l));
+                    })
+                    .map((v) => (
+                      <MenuItem key={v.name} value={v.name}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', gap: 2 }}>
+                          <span>{v.name}</span>
+                          <Typography variant="caption" color="text.secondary">{v.lang}</Typography>
+                        </Box>
+                      </MenuItem>
+                    ))}
+                </Select>
+              </FormControl>
+
+              <Grid container spacing={3} sx={{ mb: 1 }}>
+                {/* Speech rate */}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary" gutterBottom display="block">
+                    Speed: {rate.toFixed(1)}x
+                  </Typography>
+                  <Slider
+                    value={rate}
+                    min={0.5} max={2.0} step={0.1}
+                    onChange={(_e, val) => setRate(val as number)}
+                    sx={{ color: '#a855f7' }}
+                    marks={[{ value: 0.5, label: '0.5×' }, { value: 1.0, label: '1×' }, { value: 2.0, label: '2×' }]}
+                  />
+                </Grid>
+                {/* Pitch */}
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="caption" color="text.secondary" gutterBottom display="block">
+                    Pitch: {pitch.toFixed(1)}
+                  </Typography>
+                  <Slider
+                    value={pitch}
+                    min={0.5} max={2.0} step={0.1}
+                    onChange={(_e, val) => setPitch(val as number)}
+                    sx={{ color: '#a855f7' }}
+                    marks={[{ value: 0.5, label: 'Low' }, { value: 1.0, label: 'Normal' }, { value: 2.0, label: 'High' }]}
+                  />
+                </Grid>
+              </Grid>
+
+              <Button size="small" variant="outlined" startIcon={<PlayCircle />} onClick={testVoice}
+                sx={{ borderColor: '#a855f7', color: '#a855f7', '&:hover': { bgcolor: '#faf5ff', borderColor: '#9333ea' } }}>
+                Test Voice
+              </Button>
+            </CardContent>
+          </Card>
+        </Collapse>
         <Box sx={{ mb: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2" color="text.secondary">Question {current + 1} of {session.length}</Typography>
