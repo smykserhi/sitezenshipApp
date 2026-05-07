@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Card, CardContent, Typography, Button, LinearProgress, IconButton, FormControl, InputLabel, Select, MenuItem, Chip, Alert } from '@mui/material';
+import { Box, Card, CardContent, Typography, Button, LinearProgress, IconButton, FormControl, InputLabel, Select, MenuItem, Chip, Alert, SelectChangeEvent } from '@mui/material';
 import { Home, VolumeUp, Refresh } from '@mui/icons-material';
 import api from '../api';
+import { Question } from '@shared/index';
 
-function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - 0.5); }
 
-function isAnswerCorrect(transcript, answers) {
+function isAnswerCorrect(transcript: string, answers: string[]): boolean {
   const t = transcript.toLowerCase().trim();
   return answers.some((ans) => {
     const a = ans.toLowerCase();
@@ -16,22 +17,22 @@ function isAnswerCorrect(transcript, answers) {
 
 export default function AudioMode() {
   const navigate = useNavigate();
-  const [questions, setQuestions] = useState([]);
-  const [session, setSession] = useState([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [session, setSession] = useState<Question[]>([]);
   const [current, setCurrent] = useState(0);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [voices, setVoices] = useState([]);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState('');
-  const [status, setStatus] = useState('idle');
+  const [status, setStatus] = useState<'idle' | 'speaking' | 'listening' | 'result'>('idle');
   const [transcript, setTranscript] = useState('');
-  const [isCorrect, setIsCorrect] = useState(null);
-  const recognitionRef = useRef(null);
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   const scoreRef = useRef(0);
 
   useEffect(() => {
-    api.get('/questions').then((res) => { setQuestions(res.data); setSession(shuffle(res.data).slice(0, 20)); }).finally(() => setLoading(false));
+    api.get<Question[]>('/questions').then((res) => { setQuestions(res.data); setSession(shuffle(res.data).slice(0, 20)); }).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => { scoreRef.current = score; }, [score]);
@@ -46,27 +47,27 @@ export default function AudioMode() {
     return () => { window.speechSynthesis.onvoiceschanged = null; };
   }, []);
 
-  const speak = useCallback((text) => new Promise((resolve) => {
+  const speak = useCallback((text: string): Promise<void> => new Promise((resolve) => {
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     const voice = voices.find((v) => v.name === selectedVoice);
     if (voice) utter.voice = voice;
     utter.rate = 0.9;
-    utter.onend = resolve;
+    utter.onend = () => resolve();
     window.speechSynthesis.speak(utter);
   }), [voices, selectedVoice]);
 
-  const listen = useCallback(() => new Promise((resolve) => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) { resolve(''); return; }
-    const recognition = new SpeechRecognition();
+  const listen = useCallback((): Promise<string> => new Promise((resolve) => {
+    const SpeechRecognitionCtor = (window as typeof window & { webkitSpeechRecognition?: typeof SpeechRecognition }).SpeechRecognition
+      ?? (window as typeof window & { webkitSpeechRecognition?: typeof SpeechRecognition }).webkitSpeechRecognition;
+    if (!SpeechRecognitionCtor) { resolve(''); return; }
+    const recognition = new SpeechRecognitionCtor();
     recognitionRef.current = recognition;
     recognition.lang = 'en-US';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
-    recognition.onresult = (e) => resolve(e.results[0][0].transcript);
+    recognition.onresult = (e: SpeechRecognitionEvent) => resolve(e.results[0][0].transcript);
     recognition.onerror = () => resolve('');
-    recognition.onend = () => {};
     recognition.start();
   }), []);
 
@@ -128,9 +129,12 @@ export default function AudioMode() {
     );
   }
 
-  const q = session[current] || {};
+  const q = session[current] ?? {} as Question;
   const progress = Math.round(((current + 1) / session.length) * 100);
-  const hasSpeechRecognition = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  const hasSpeechRecognition = !!(
+    (window as typeof window & { SpeechRecognition?: unknown }).SpeechRecognition ??
+    (window as typeof window & { webkitSpeechRecognition?: unknown }).webkitSpeechRecognition
+  );
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
@@ -147,7 +151,7 @@ export default function AudioMode() {
           <CardContent>
             <FormControl fullWidth size="small">
               <InputLabel>Voice / Accent</InputLabel>
-              <Select value={selectedVoice} label="Voice / Accent" onChange={(e) => setSelectedVoice(e.target.value)}>
+              <Select value={selectedVoice} label="Voice / Accent" onChange={(e: SelectChangeEvent) => setSelectedVoice(e.target.value)}>
                 {voices.map((v) => <MenuItem key={v.name} value={v.name}>{v.name} ({v.lang})</MenuItem>)}
               </Select>
             </FormControl>

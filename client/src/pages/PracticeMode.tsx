@@ -3,10 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Card, CardContent, Typography, Button, Grid, LinearProgress, Chip, IconButton } from '@mui/material';
 import { Home, Refresh, CheckCircle, Cancel } from '@mui/icons-material';
 import api from '../api';
+import { Question } from '@shared/index';
 
-function shuffle(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+interface SessionQuestion extends Question {
+  correct: string;
+  choices: string[];
+}
 
-function buildSession(questions) {
+function shuffle<T>(arr: T[]): T[] { return [...arr].sort(() => Math.random() - 0.5); }
+
+function buildSession(questions: Question[]): SessionQuestion[] {
   return shuffle(questions).slice(0, 20).map((q) => {
     const correct = q.answers[Math.floor(Math.random() * q.answers.length)];
     return { ...q, correct, choices: shuffle([correct, ...q.fakeAnswers]) };
@@ -15,19 +21,19 @@ function buildSession(questions) {
 
 export default function PracticeMode() {
   const navigate = useNavigate();
-  const [questions, setQuestions] = useState([]);
-  const [session, setSession] = useState([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [session, setSession] = useState<SessionQuestion[]>([]);
   const [current, setCurrent] = useState(0);
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get('/questions').then((res) => { setQuestions(res.data); setSession(buildSession(res.data)); }).finally(() => setLoading(false));
+    api.get<Question[]>('/questions').then((res) => { setQuestions(res.data); setSession(buildSession(res.data)); }).finally(() => setLoading(false));
   }, []);
 
-  const handleSelect = (choice) => {
+  const handleSelect = (choice: string) => {
     if (selected !== null) return;
     setSelected(choice);
     const correct = choice === session[current].correct;
@@ -101,7 +107,7 @@ export default function PracticeMode() {
         </Card>
         <Grid container spacing={2}>
           {q.choices.map((choice, i) => {
-            let bgcolor = 'white', borderColor = '#e5e7eb', textColor = 'text.primary';
+            let bgcolor = 'white', borderColor = '#e5e7eb', textColor: string | undefined = undefined;
             if (selected !== null) {
               if (choice === q.correct) { bgcolor = '#ecfdf5'; borderColor = '#10b981'; textColor = '#065f46'; }
               else if (choice === selected) { bgcolor = '#fff1f2'; borderColor = '#f43f5e'; textColor = '#9f1239'; }
@@ -114,7 +120,7 @@ export default function PracticeMode() {
                   <CardContent sx={{ py: 2, px: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
                     {selected !== null && choice === q.correct && <CheckCircle sx={{ color: '#10b981', fontSize: 20 }} />}
                     {selected !== null && choice === selected && choice !== q.correct && <Cancel sx={{ color: '#f43f5e', fontSize: 20 }} />}
-                    <Typography variant="body2" fontWeight={500} color={textColor}>{choice}</Typography>
+                    <Typography variant="body2" fontWeight={500} sx={{ color: textColor }}>{choice}</Typography>
                   </CardContent>
                 </Card>
               </Grid>

@@ -3,15 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Card, CardContent, Typography, Button, LinearProgress, Chip, IconButton, Divider, List, ListItem, ListItemText } from '@mui/material';
 import { ArrowBack, ArrowForward, Home } from '@mui/icons-material';
 import api from '../api';
+import { Question } from '@shared/index';
 
 export default function EducationMode() {
   const navigate = useNavigate();
-  const [questions, setQuestions] = useState([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [index, setIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([api.get('/questions'), api.get('/progress')])
+    Promise.all([api.get<Question[]>('/questions'), api.get<{ education: { lastQuestionIndex: number } }>('/progress')])
       .then(([qRes, pRes]) => {
         setQuestions(qRes.data);
         setIndex(pRes.data.education?.lastQuestionIndex ?? 0);
@@ -19,11 +20,11 @@ export default function EducationMode() {
       .finally(() => setLoading(false));
   }, []);
 
-  const saveProgress = useCallback((newIndex) => {
+  const saveProgress = useCallback((newIndex: number) => {
     api.put('/progress', { education: { lastQuestionIndex: newIndex } }).catch(() => {});
   }, []);
 
-  const goTo = (newIndex) => { setIndex(newIndex); saveProgress(newIndex); };
+  const goTo = (newIndex: number) => { setIndex(newIndex); saveProgress(newIndex); };
 
   if (loading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}><LinearProgress sx={{ width: 300 }} /></Box>;
 

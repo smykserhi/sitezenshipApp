@@ -4,8 +4,19 @@ import { Box, Card, CardContent, CardActionArea, Typography, Grid, Chip, AppBar,
 import { School, Quiz, RecordVoiceOver, Logout } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
+import { ProgressData } from '@shared/index';
 
-const MODES = [
+interface ModeConfig {
+  key: 'education' | 'practice' | 'audio';
+  label: string;
+  icon: JSX.Element;
+  description: string;
+  color: string;
+  bg: string;
+  path: string;
+}
+
+const MODES: ModeConfig[] = [
   { key: 'education', label: 'Education Mode', icon: <School sx={{ fontSize: 48 }} />, description: 'Study all 100 civics questions and official answers at your own pace.', color: '#6366f1', bg: '#eef2ff', path: '/education' },
   { key: 'practice', label: 'Practice Mode', icon: <Quiz sx={{ fontSize: 48 }} />, description: '20 random questions with 6 choices each. Pass with 12 or more correct.', color: '#10b981', bg: '#ecfdf5', path: '/practice' },
   { key: 'audio', label: 'Audio Mode', icon: <RecordVoiceOver sx={{ fontSize: 48 }} />, description: 'Listen to questions spoken aloud and answer verbally — just like the real interview.', color: '#a855f7', bg: '#faf5ff', path: '/audio' },
@@ -14,17 +25,17 @@ const MODES = [
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [progress, setProgress] = useState(null);
+  const [progress, setProgress] = useState<ProgressData | null>(null);
 
   useEffect(() => {
-    api.get('/progress').then((res) => setProgress(res.data)).catch(() => {});
+    api.get<ProgressData>('/progress').then((res) => setProgress(res.data)).catch(() => {});
   }, []);
 
   const educationPct = progress ? Math.round((progress.education.lastQuestionIndex / 100) * 100) : 0;
   const practiceSessions = progress?.practice?.sessions ?? [];
   const audioSessions = progress?.audio?.sessions ?? [];
 
-  const modeStats = {
+  const modeStats: Record<ModeConfig['key'], string> = {
     education: `${educationPct}% complete`,
     practice: practiceSessions.length ? `${practiceSessions.length} session(s) — Best: ${Math.max(...practiceSessions.map((s) => s.score))}/20` : 'No sessions yet',
     audio: audioSessions.length ? `${audioSessions.length} session(s) — Best: ${Math.max(...audioSessions.map((s) => s.score))}/20` : 'No sessions yet',
