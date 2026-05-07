@@ -120,7 +120,7 @@ export default function AudioMode() {
         setCurrent((c) => c + 1);
         setStatus('idle');
       }
-    }, 2500);
+    }, 4000);
   }, [current, session, speak, listen]);
 
   const restart = () => {
