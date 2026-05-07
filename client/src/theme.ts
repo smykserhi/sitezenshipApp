@@ -1,6 +1,6 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme, Theme } from '@mui/material/styles';
 
-const theme = createTheme({
+const theme: Theme = createTheme({
   palette: {
     mode: 'light',
     background: { default: '#f0f2ff', paper: '#ffffff' },

@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { ReactNode } from 'react';
 import { useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -7,9 +8,9 @@ import EducationMode from './pages/EducationMode';
 import PracticeMode from './pages/PracticeMode';
 import AudioMode from './pages/AudioMode';
 
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children }: { children: ReactNode }) {
   const { token } = useAuth();
-  return token ? children : <Navigate to="/login" replace />;
+  return token ? <>{children}</> : <Navigate to="/login" replace />;
 }
 
 export default function App() {
