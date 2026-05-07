@@ -1,0 +1,8 @@
+{"type":"server-started","port":64214,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:64214","screen_dir":"/Users/serhii.smyk/workplace/playground/sitizenshipTest/.superpowers/brainstorm/57977-1778175006/content","state_dir":"/Users/serhii.smyk/workplace/playground/sitizenshipTest/.superpowers/brainstorm/57977-1778175006/state"}
+{"type":"screen-added","file":"/Users/serhii.smyk/workplace/playground/sitizenshipTest/.superpowers/brainstorm/57977-1778175006/content/approaches.html"}
+{"source":"user-event","type":"click","text":"A\n    \n      ⭐ Monorepo — Express serves React (Recommended)\n      Single repo with server/ and client/ folders. Vite builds React into client/dist, Express serves it as static files. One package.json at root orchestrates both. Deployed as a single Node process.\n      \n        ProsOne repo, one deployVite = fast HMR in devSimple proxy setup for API callsEasiest to host (Railway, Render, Heroku)\n        ConsClient & server share the same process in production","choice":"a","id":null,"timestamp":1778176144479}
+{"type":"screen-added","file":"/Users/serhii.smyk/workplace/playground/sitizenshipTest/.superpowers/brainstorm/57977-1778175006/content/architecture.html"}
+{"type":"screen-added","file":"/Users/serhii.smyk/workplace/playground/sitizenshipTest/.superpowers/brainstorm/57977-1778175006/content/data-models.html"}
+{"type":"screen-added","file":"/Users/serhii.smyk/workplace/playground/sitizenshipTest/.superpowers/brainstorm/57977-1778175006/content/ui-modes.html"}
+{"type":"screen-added","file":"/Users/serhii.smyk/workplace/playground/sitizenshipTest/.superpowers/brainstorm/57977-1778175006/content/ui-soft.html"}
+{"type":"server-stopped","reason":"idle timeout"}

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI Design — Soft Palette</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f0f2ff;
+    color: #2d2d4e;
+    padding: 24px;
+  }
+  h1 { font-size: 20px; font-weight: 700; color: #3730a3; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #6b7280; margin-bottom: 24px; }
+
+  /* NAV */
+  .nav {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 12px rgba(99,102,241,0.08);
+    margin-bottom: 20px;
+  }
+  .nav-logo { font-weight: 700; font-size: 15px; color: #3730a3; }
+  .nav-logo span { margin-right: 6px; }
+  .nav-user { font-size: 13px; color: #6b7280; }
+  .nav-user strong { color: #3730a3; }
+  .nav-btn { background: #ede9fe; color: #4f46e5; border: none; border-radius: 8px; padding: 6px 14px; font-size: 12px; cursor: pointer; }
+
+  /* DASHBOARD CARDS */
+  .cards-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+  .mode-card {
+    flex: 1; min-width: 180px;
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    border-top: 4px solid;
+    transition: transform 0.2s;
+  }
+  .mode-card.edu  { border-color: #6366f1; }
+  .mode-card.prac { border-color: #10b981; }
+  .mode-card.aud  { border-color: #a855f7; }
+  .mode-icon { font-size: 28px; margin-bottom: 10px; }
+  .mode-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; color: #1e1b4b; }
+  .mode-sub { font-size: 12px; color: #9ca3af; margin-bottom: 14px; }
+  .mode-btn {
+    display: block; text-align: center;
+    padding: 8px; border-radius: 8px;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+  }
+  .mode-card.edu  .mode-btn { background: #ede9fe; color: #4f46e5; }
+  .mode-card.prac .mode-btn { background: #d1fae5; color: #065f46; }
+  .mode-card.aud  .mode-btn { background: #f3e8ff; color: #7e22ce; }
+
+  /* SECTION LABELS */
+  .section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    color: #9ca3af; text-transform: uppercase; margin-bottom: 12px;
+  }
+
+  /* MODE SCREENS */
+  .screen { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); margin-bottom: 20px; }
+  .screen-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .screen-title { font-size: 14px; font-weight: 700; color: #3730a3; }
+  .screen-badge { background: #ede9fe; color: #4f46e5; border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 600; }
+
+  /* EDUCATION MODE */
+  .question-card {
+    background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 100%);
+    border-radius: 12px; padding: 18px; margin-bottom: 14px;
+  }
+  .question-text { font-size: 15px; font-weight: 600; color: #1e1b4b; line-height: 1.5; }
+  .answer-list { display: flex; flex-direction: column; gap: 8px; }
+  .answer-item {
+    background: #f0fdf4; border: 1.5px solid #bbf7d0;
+    border-radius: 10px; padding: 10px 14px;
+    font-size: 13px; color: #065f46; font-weight: 500;
+  }
+  .nav-btns { display: flex; gap: 10px; margin-top: 14px; align-items: center; }
+  .nav-btn-pill {
+    flex: 1; text-align: center; background: #f3f4f6;
+    border-radius: 8px; padding: 8px; font-size: 12px; color: #4b5563; cursor: pointer;
+  }
+  .progress-bar { flex: 2; height: 6px; background: #e5e7eb; border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #6366f1, #a855f7); width: 24%; }
+
+  /* PRACTICE MODE */
+  .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .choice {
+    background: #f9fafb; border: 1.5px solid #e5e7eb;
+    border-radius: 10px; padding: 12px; font-size: 13px; color: #374151; cursor: pointer;
+  }
+  .choice.correct { background: #f0fdf4; border-color: #86efac; color: #065f46; font-weight: 600; }
+  .choice.wrong   { background: #fff1f2; border-color: #fca5a5; color: #991b1b; }
+  .score-bar { margin-top: 12px; background: #f3f4f6; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #6b7280; display: flex; justify-content: space-between; }
+
+  /* AUDIO MODE */
+  .audio-center { text-align: center; padding: 8px 0; }
+  .voice-select {
+    display: inline-block; background: #f3f4f6; border-radius: 8px;
+    padding: 6px 14px; font-size: 12px; color: #4b5563; margin-bottom: 20px;
+  }
+  .officer-avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, #c7d2fe, #a5b4fc);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; margin: 0 auto 12px;
+    box-shadow: 0 0 0 6px #e0e7ff;
+  }
+  .officer-saying { font-size: 13px; color: #9ca3af; margin-bottom: 6px; }
+  .officer-quote { font-size: 14px; font-style: italic; color: #1e1b4b; font-weight: 600; margin-bottom: 20px; }
+  .mic-btn {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, #f3e8ff, #ede9fe);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; margin: 0 auto 8px;
+    box-shadow: 0 0 0 5px #f5f3ff;
+    cursor: pointer; border: 2px solid #c4b5fd;
+  }
+  .mic-label { font-size: 12px; color: #9ca3af; margin-bottom: 14px; }
+  .result-badge {
+    display: inline-block; background: #f0fdf4; border: 1.5px solid #86efac;
+    border-radius: 10px; padding: 8px 16px; font-size: 13px; color: #065f46; font-weight: 600;
+  }
+
+  .page-title { margin-bottom: 24px; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>🇺🇸 UI Design — Soft Color Palette</h1>
+  <p class="subtitle">Material UI with soft indigo, emerald & purple tones — light, calm, welcoming</p>
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-logo"><span>🇺🇸</span> Citizenship Test Prep</div>
+  <div class="nav-user">Welcome, <strong>John</strong></div>
+  <button class="nav-btn">Logout</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="section-label">Dashboard</div>
+<div class="cards-row">
+  <div class="mode-card edu">
+    <div class="mode-icon">📖</div>
+    <div class="mode-title">Education Mode</div>
+    <div class="mode-sub">Last: Question 24 of 100</div>
+    <div class="mode-btn">Continue →</div>
+  </div>
+  <div class="mode-card prac">
+    <div class="mode-icon">✅</div>
+    <div class="mode-title">Practice Mode</div>
+    <div class="mode-sub">Best: 15/20 — Passed ✓</div>
+    <div class="mode-btn">Start Session →</div>
+  </div>
+  <div class="mode-card aud">
+    <div class="mode-icon">🎙️</div>
+    <div class="mode-title">Audio Mode</div>
+    <div class="mode-sub">Mimics real USCIS interview</div>
+    <div class="mode-btn">Start Interview →</div>
+  </div>
+</div>
+
+<!-- EDUCATION MODE -->
+<div class="section-label">Mode 1 — Education</div>
+<div class="screen">
+  <div class="screen-header">
+    <div class="screen-title">📖 Education Mode</div>
+    <div class="screen-badge">Q 24 / 100</div>
+  </div>
+  <div class="question-card">
+    <div class="question-text">Who is in charge of the executive branch?</div>
+  </div>
+  <div class="answer-list">
+    <div class="answer-item">▪ the President</div>
+  </div>
+  <div class="nav-btns">
+    <div class="nav-btn-pill">← Prev</div>
+    <div class="progress-bar"><div class="progress-fill"></div></div>
+    <div class="nav-btn-pill">Next →</div>
+  </div>
+</div>
+
+<!-- PRACTICE MODE -->
+<div class="section-label">Mode 2 — Practice</div>
+<div class="screen">
+  <div class="screen-header">
+    <div class="screen-title">✅ Practice Mode</div>
+    <div class="screen-badge">Q 3 / 20</div>
+  </div>
+  <div class="question-card">
+    <div class="question-text">What is the supreme law of the land?</div>
+  </div>
+  <div class="choices-grid">
+    <div class="choice">A. The Bill of Rights</div>
+    <div class="choice correct">B. The Constitution ✓</div>
+    <div class="choice">C. Declaration of Independence</div>
+    <div class="choice">D. The Federalist Papers</div>
+    <div class="choice">E. Articles of Confederation</div>
+    <div class="choice">F. The Emancipation Proclamation</div>
+  </div>
+  <div class="score-bar">
+    <span>Score: <strong>2 / 2</strong> correct</span>
+    <span>Need <strong>12/20</strong> to pass</span>
+  </div>
+</div>
+
+<!-- AUDIO MODE -->
+<div class="section-label">Mode 3 — Audio</div>
+<div class="screen">
+  <div class="screen-header">
+    <div class="screen-title">🎙️ Audio Mode</div>
+    <div class="screen-badge">Q 3 / 20</div>
+  </div>
+  <div class="audio-center">
+    <div class="voice-select">🔊 Voice: Standard American ▾</div>
+    <div class="officer-avatar">👮</div>
+    <div class="officer-saying">Officer is asking...</div>
+    <div class="officer-quote">"What is the supreme law of the land?"</div>
+    <div class="mic-btn">🎤</div>
+    <div class="mic-label">Tap to speak your answer</div>
+    <div class="result-badge">✅ Heard: "the constitution" — Correct!</div>
+  </div>
+</div>
+
+<p style="margin-top:24px;font-size:13px;color:#9ca3af;text-align:center">Does this soft color palette feel right? Any tweaks to colors, layout, or style?</p>
+
+</body>
+</html>

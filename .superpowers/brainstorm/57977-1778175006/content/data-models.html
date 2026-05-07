@@ -1,0 +1,74 @@
+<h2>Data Models</h2>
+<p class="subtitle">Two MongoDB collections — User and Progress</p>
+
+<div class="section">
+  <h3>👤 User Model</h3>
+  <div class="mockup">
+    <div class="mockup-header">users collection</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:13px;line-height:1.8">
+<pre style="margin:0">
+{
+  _id:       ObjectId,
+  email:     String (unique, required),
+  password:  String (bcrypt hashed),
+  name:      String,
+  createdAt: Date
+}
+</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>📊 Progress Model</h3>
+  <div class="mockup">
+    <div class="mockup-header">progress collection</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:13px;line-height:1.8">
+<pre style="margin:0">
+{
+  _id:    ObjectId,
+  userId: ObjectId (ref: User),
+
+  education: {
+    lastQuestionIndex: Number,   // where user left off (0–99)
+    completedSections: [String]  // e.g. ["A","B","C"]
+  },
+
+  practice: {
+    sessions: [{
+      date:       Date,
+      score:      Number,        // correct answers
+      total:      Number,        // always 20
+      passed:     Boolean,       // score >= 12
+      questionIds:[Number]       // which 20 questions were asked
+    }]
+  },
+
+  audio: {
+    sessions: [{
+      date:    Date,
+      score:   Number,
+      total:   Number,
+      passed:  Boolean
+    }]
+  }
+}
+</pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>📚 Questions Data (not in DB)</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="font-size:13px;line-height:1.8">
+      All 100 questions are stored in <code>data/questions.js</code> — a static JS file parsed from <code>Questions.md</code>. Each question has:
+      <br><br>
+      <code>{ id, section, question, answers: [String], fakeAnswers: [String] }</code>
+      <br><br>
+      <strong>fakeAnswers</strong> = 5 plausible-but-wrong answers generated per question, stored statically. In Practice Mode, 1 correct + 5 fake = 6 choices shown to user.
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:24px">Does this data model look right? Reply yes or share any concerns.</p>

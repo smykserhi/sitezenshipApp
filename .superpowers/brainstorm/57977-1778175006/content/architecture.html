@@ -1,0 +1,74 @@
+<h2>System Architecture</h2>
+<p class="subtitle">Monorepo — Express serves React build at the same endpoint</p>
+
+<div class="section">
+  <h3>📁 Folder Structure</h3>
+  <div class="mockup">
+    <div class="mockup-header">Project Root</div>
+    <div class="mockup-body" style="font-family:monospace;font-size:13px;line-height:1.8">
+      <pre style="margin:0">
+citizenship-test/
+├── server/
+│   ├── index.js              ← Express entry point
+│   ├── routes/
+│   │   ├── auth.js           ← /api/auth (register, login)
+│   │   ├── progress.js       ← /api/progress (save/load)
+│   │   └── questions.js      ← /api/questions (fetch questions)
+│   ├── models/
+│   │   ├── User.js           ← Mongoose User model
+│   │   └── Progress.js       ← Mongoose Progress model
+│   └── middleware/
+│       └── auth.js           ← JWT verification middleware
+├── client/
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Login.jsx
+│   │   │   ├── Register.jsx
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── EducationMode.jsx
+│   │   │   ├── PracticeMode.jsx
+│   │   │   └── AudioMode.jsx
+│   │   ├── components/       ← Shared MUI components
+│   │   ├── context/          ← AuthContext
+│   │   └── App.jsx
+│   └── vite.config.js        ← Proxy /api → Express in dev
+├── data/
+│   └── questions.js          ← All 100 Q&A + fake answers
+├── package.json              ← Root scripts (dev, build, start)
+└── .env                      ← MONGODB_URI, JWT_SECRET
+      </pre>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>🔄 Request Flow</h3>
+  <div class="mockup">
+    <div class="mockup-header">Dev vs Production</div>
+    <div class="mockup-body">
+      <div class="split">
+        <div style="flex:1;padding:12px">
+          <h4 style="margin:0 0 8px">🔧 Development</h4>
+          <p style="font-size:13px;margin:0">Vite dev server on :5173<br>Proxies <code>/api/*</code> → Express on :5000<br>Hot module replacement enabled</p>
+        </div>
+        <div style="flex:1;padding:12px;border-left:1px solid #333">
+          <h4 style="margin:0 0 8px">🚀 Production</h4>
+          <p style="font-size:13px;margin:0">Express on :5000 only<br>Serves <code>client/dist</code> as static files<br>All <code>/api/*</code> routes handled by Express<br>React Router handled by catch-all</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>🔐 Auth Flow</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="font-size:13px;line-height:2">
+      Register/Login → JWT token returned → stored in <code>localStorage</code><br>
+      Every API request sends <code>Authorization: Bearer &lt;token&gt;</code><br>
+      Protected routes check token via middleware before responding
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top:24px">Does this architecture look right? Reply yes or share any concerns.</p>

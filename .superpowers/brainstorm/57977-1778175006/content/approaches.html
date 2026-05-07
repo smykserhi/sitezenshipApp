@@ -1,0 +1,41 @@
+<h2>Project Architecture Approaches</h2>
+<p class="subtitle">Pick the structure that fits best — all use Node.js + Express + MongoDB Atlas + React + Material UI</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>⭐ Monorepo — Express serves React (Recommended)</h3>
+      <p>Single repo with <code>server/</code> and <code>client/</code> folders. Vite builds React into <code>client/dist</code>, Express serves it as static files. One <code>package.json</code> at root orchestrates both. Deployed as a single Node process.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>One repo, one deploy</li><li>Vite = fast HMR in dev</li><li>Simple proxy setup for API calls</li><li>Easiest to host (Railway, Render, Heroku)</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Client &amp; server share the same process in production</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Monorepo — Separate Dev Servers, Nginx in Prod</h3>
+      <p>Same folder structure, but in production an Nginx reverse proxy routes <code>/api/*</code> to Express and serves React static files directly. More production-grade separation.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Better static file serving performance</li><li>Clear API / frontend separation</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>Requires Nginx config &amp; VPS or Docker</li><li>More moving parts</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Two Repos — Independent Frontend &amp; Backend</h3>
+      <p>Separate Git repos. React deployed to Vercel/Netlify, Express to Railway/Render. Communicate via CORS-enabled REST API.</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>Independent scaling &amp; deployment</li><li>Clean separation</li></ul></div>
+        <div class="cons"><h4>Cons</h4>
+        <ul><li>Two repos to manage</li><li>CORS config required</li><li>Contradicts "same endpoint" requirement</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>

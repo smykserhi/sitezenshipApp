@@ -1,5 +1,7 @@
+import { Question } from '../types';
+
 // All 100 USCIS civics questions. fakeAnswers: 5 wrong options for Practice/Audio modes.
-const questions = [
+const questions: Question[] = [
   { id: 1, category: 'AMERICAN GOVERNMENT', section: 'A: Principles of American Democracy',
     question: 'What is the supreme law of the land?',
     answers: ['the Constitution'],
@@ -402,4 +404,4 @@ const questions = [
     fakeAnswers: ['Easter and Halloween', 'Super Bowl Sunday and Thanksgiving', "Valentine's Day and St. Patrick's Day", "April Fools' Day and Labor Day", 'Groundhog Day and Columbus Day'] },
 ];
 
-module.exports = questions;
+export default questions;
