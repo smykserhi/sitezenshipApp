@@ -59,11 +59,17 @@ export default function EducationMode() {
               Official Answer{q.answers.length > 1 ? 's' : ''} (any one is acceptable):
             </Typography>
             <Divider sx={{ my: 1 }} />
-            <List dense>
+            <List disablePadding>
               {q.answers.map((ans, i) => (
-                <ListItem key={i} sx={{ py: 0.5 }}>
-                  <ListItemText primary={ans} primaryTypographyProps={{ color: 'text.primary', fontWeight: 500 }} />
-                </ListItem>
+                <Box key={i}>
+                  <ListItem sx={{ py: 1.5, px: 0 }}>
+                    <ListItemText
+                      primary={ans.charAt(0).toUpperCase() + ans.slice(1)}
+                      primaryTypographyProps={{ color: 'text.primary', fontWeight: 500, fontSize: '1.05rem', lineHeight: 1.5 }}
+                    />
+                  </ListItem>
+                  {i < q.answers.length - 1 && <Divider />}
+                </Box>
               ))}
             </List>
           </CardContent>
