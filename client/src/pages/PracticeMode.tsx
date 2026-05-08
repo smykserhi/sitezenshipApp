@@ -30,6 +30,10 @@ export default function PracticeMode() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setSelected(null);
+  }, [current]);
+
+  useEffect(() => {
     api.get<Question[]>('/questions').then((res) => { setQuestions(res.data); setSession(buildSession(res.data)); }).finally(() => setLoading(false));
   }, []);
 
@@ -45,10 +49,10 @@ export default function PracticeMode() {
         setScore(finalScore);
         setDone(true);
       } else {
-        setCurrent((c) => c + 1);
         setSelected(null);
+        setCurrent((c) => c + 1);
       }
-    }, 1200);
+    }, 3000);
   };
 
   const restart = () => { setSession(buildSession(questions)); setCurrent(0); setSelected(null); setScore(0); setDone(false); };
