@@ -17,7 +17,7 @@ interface ModeConfig {
 }
 
 const MODES: ModeConfig[] = [
-  { key: 'education', label: 'Education Mode', icon: <School sx={{ fontSize: 48 }} />, description: 'Study all 100 civics questions and official answers at your own pace.', color: '#6366f1', bg: '#eef2ff', path: '/education' },
+  { key: 'education', label: 'Education Mode', icon: <School sx={{ fontSize: 48 }} />, description: 'Study all 128 civics questions and official answers at your own pace.', color: '#6366f1', bg: '#eef2ff', path: '/education' },
   { key: 'practice', label: 'Practice Mode', icon: <Quiz sx={{ fontSize: 48 }} />, description: '20 random questions with 6 choices each. Pass with 12 or more correct.', color: '#10b981', bg: '#ecfdf5', path: '/practice' },
   { key: 'audio', label: 'Audio Mode', icon: <RecordVoiceOver sx={{ fontSize: 48 }} />, description: 'Listen to questions spoken aloud and answer verbally — just like the real interview.', color: '#a855f7', bg: '#faf5ff', path: '/audio' },
 ];
@@ -31,7 +31,7 @@ export default function Dashboard() {
     api.get<ProgressData>('/progress').then((res) => setProgress(res.data)).catch(() => {});
   }, []);
 
-  const educationPct = progress ? Math.round((progress.education.lastQuestionIndex / 100) * 100) : 0;
+  const educationPct = progress ? Math.round((progress.education.lastQuestionIndex / 128) * 100) : 0;
   const practiceSessions = progress?.practice?.sessions ?? [];
   const audioSessions = progress?.audio?.sessions ?? [];
 
