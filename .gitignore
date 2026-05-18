@@ -2,3 +2,9 @@ node_modules/
 client/node_modules/
 client/dist/
 .env
+
+# Test artifacts (generated locally, uploaded to GitHub Actions)
+test-results/
+playwright-report/
+.playwright/
+

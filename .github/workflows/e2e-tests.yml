@@ -1,0 +1,152 @@
+name: E2E Tests - Production Monitoring
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  wait-and-test:
+    name: Wait for Deployment & Run E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Wait 3 minutes for deployment to complete
+        run: |
+          echo "⏳ Waiting 3 minutes for production deployment to complete..."
+          sleep 180
+          echo "✅ Deployment wait complete, starting tests..."
+
+      - name: Run E2E tests with retry logic
+        run: |
+          echo "🧪 Starting E2E test execution with retry loop..."
+          
+          MAX_ATTEMPTS=6  # 6 attempts = initial + 5 retries = ~18 minutes total
+          ATTEMPT=1
+          TEST_PASSED=false
+          
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo ""
+            echo "📍 Attempt $ATTEMPT of $MAX_ATTEMPTS"
+            echo "⏱️  Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+            
+            # Run the test
+            if npm run test:e2e; then
+              echo "✅ Tests passed!"
+              TEST_PASSED=true
+              break
+            else
+              TEST_EXIT_CODE=$?
+              
+              if [ $ATTEMPT -lt $MAX_ATTEMPTS ]; then
+                echo "❌ Tests failed on attempt $ATTEMPT"
+                echo "⏳ Waiting 3 minutes before retry (attempt $(($ATTEMPT + 1))/$MAX_ATTEMPTS)..."
+                sleep 180
+              else
+                echo "❌ Tests failed on final attempt $ATTEMPT"
+              fi
+            fi
+            
+            ATTEMPT=$(($ATTEMPT + 1))
+          done
+          
+          if [ "$TEST_PASSED" = false ]; then
+            echo ""
+            echo "🚨 All test attempts failed!"
+            exit 1
+          fi
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload test results JSON
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-json
+          path: test-results/
+          retention-days: 7
+
+      - name: Comment on PR with test results
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const resultsPath = 'test-results/results.json';
+            
+            let comment = '## E2E Test Results\n\n';
+            
+            if (fs.existsSync(resultsPath)) {
+              const results = JSON.parse(fs.readFileSync(resultsPath, 'utf8'));
+              const stats = results.stats || {};
+              comment += `✅ Tests completed\n`;
+              comment += `- **Passed:** ${stats.expected || 0}\n`;
+              comment += `- **Failed:** ${stats.unexpected || 0}\n`;
+              comment += `- **Duration:** ${(stats.duration / 1000).toFixed(2)}s\n`;
+            } else {
+              comment += `Tests ${context.job.status === 'success' ? 'passed ✅' : 'failed ❌'}\n`;
+            }
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  # Alternative: Scheduled retry workflow (optional, for additional monitoring)
+  scheduled-retry:
+    name: Scheduled E2E Test (Every 30 minutes)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-scheduled
+          path: playwright-report/
+          retention-days: 3
