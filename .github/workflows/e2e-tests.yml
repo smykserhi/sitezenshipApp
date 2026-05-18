@@ -6,12 +6,15 @@ on:
       - main
   workflow_dispatch:
   schedule:
-    # Run every 3 minutes. Note: GitHub Actions may enforce scheduling limits.
+    # Run every 5 minutes. GitHub Actions schedules support a minimum of 5-minute intervals.
     - cron: '*/5 * * * *'
 
 jobs:
   wait-and-test:
     name: Wait for Deployment & Run E2E Tests
+    concurrency:
+      group: e2e-tests
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -120,36 +123,3 @@ jobs:
               body: comment
             });
 
-  # Alternative: Scheduled retry workflow (optional, for additional monitoring)
-  scheduled-retry:
-    name: Scheduled E2E Test (Every 3 minutes)
-    runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    timeout-minutes: 10
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps
-
-      - name: Run E2E tests
-        run: npm run test:e2e
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report-scheduled
-          path: playwright-report/
-          retention-days: 3
