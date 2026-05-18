@@ -173,13 +173,13 @@ export default function AudioMode() {
           </IconButton>
         </Tooltip>
       </Box>
-      <Box sx={{ maxWidth: 700, mx: 'auto', p: 3 }}>
+      <Box sx={{ maxWidth: 700, mx: 'auto', p: 3, overflow: 'visible' }}>
         {!hasSpeechRecognition && (
           <Alert severity="warning" sx={{ mb: 2 }}>Your browser does not support speech recognition. Try Chrome or Edge for the full experience.</Alert>
         )}
-        <Collapse in={showSettings}>
-          <Card sx={{ mb: 3, border: '1px solid #e9d5ff' }}>
-            <CardContent>
+        <Collapse in={showSettings} sx={{ overflow: 'visible' }}>
+          <Card sx={{ mb: 3, border: '1px solid #e9d5ff', overflow: 'visible' }}>
+            <CardContent sx={{ overflow: 'visible' }}>
               <Typography variant="subtitle2" color="#a855f7" fontWeight={700} gutterBottom>
                 🎙️ Voice Settings
               </Typography>
@@ -215,7 +215,17 @@ export default function AudioMode() {
               {/* Voice selector */}
               <FormControl fullWidth size="small" sx={{ mb: 2 }}>
                 <InputLabel>Voice</InputLabel>
-                <Select value={selectedVoice} label="Voice" onChange={(e: SelectChangeEvent) => setSelectedVoice(e.target.value)}>
+                <Select 
+                  value={selectedVoice} 
+                  label="Voice" 
+                  onChange={(e: SelectChangeEvent) => setSelectedVoice(e.target.value)}
+                  MenuProps={{
+                    anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                    transformOrigin: { vertical: 'top', horizontal: 'left' },
+                    PaperProps: { sx: { maxHeight: 300, zIndex: 1300 } },
+                    disableScrollLock: true,
+                  }}
+                >
                   {voices
                     .filter((v) => {
                       const filter = ACCENT_FILTERS.find((f) => f.label === accentFilter);
