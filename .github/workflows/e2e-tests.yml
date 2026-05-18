@@ -5,6 +5,9 @@ on:
     branches:
       - main
   workflow_dispatch:
+  schedule:
+    # Run every 3 minutes. Note: GitHub Actions may enforce scheduling limits.
+    - cron: '*/3 * * * *'
 
 jobs:
   wait-and-test:
@@ -119,7 +122,7 @@ jobs:
 
   # Alternative: Scheduled retry workflow (optional, for additional monitoring)
   scheduled-retry:
-    name: Scheduled E2E Test (Every 30 minutes)
+    name: Scheduled E2E Test (Every 3 minutes)
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 10
