@@ -4,6 +4,7 @@ import { Box, Card, CardContent, Typography, Button, LinearProgress, IconButton,
 import { Home, VolumeUp, Refresh, Settings, PlayCircle } from '@mui/icons-material';
 import api from '../api';
 import { Question } from '@shared/index';
+import { useQuestionSet } from '../context/QuestionSetContext';
 
 const ACCENT_FILTERS: { label: string; langs: string[] }[] = [
   { label: 'All', langs: [] },
@@ -26,6 +27,15 @@ function isAnswerCorrect(transcript: string, answers: string[]): boolean {
 
 export default function AudioMode() {
   const navigate = useNavigate();
+  const { questionSet } = useQuestionSet();
+  const isForm = questionSet === 'form';
+  const questionsEndpoint = isForm ? '/questions/form' : '/questions';
+  const sessionEndpoint = isForm ? '/progress/form/audio/session' : '/progress/audio/session';
+  const accentColor = isForm ? '#f59e0b' : '#a855f7';
+  const accentBg = isForm ? '#fffbeb' : '#faf5ff';
+  const gradient = isForm
+    ? 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)'
+    : 'linear-gradient(135deg, #a855f7 0%, #c084fc 100%)';
   const [questions, setQuestions] = useState<Question[]>([]);
   const [session, setSession] = useState<Question[]>([]);
   const [current, setCurrent] = useState(0);
@@ -45,8 +55,8 @@ export default function AudioMode() {
   const scoreRef = useRef(0);
 
   useEffect(() => {
-    api.get<Question[]>('/questions').then((res) => { setQuestions(res.data); setSession(shuffle(res.data).slice(0, 20)); }).finally(() => setLoading(false));
-  }, []);
+    api.get<Question[]>(questionsEndpoint).then((res) => { setQuestions(res.data); setSession(shuffle(res.data).slice(0, 20)); }).finally(() => setLoading(false));
+  }, [questionsEndpoint]);
 
   useEffect(() => { scoreRef.current = score; }, [score]);
 
@@ -113,7 +123,7 @@ export default function AudioMode() {
     setTimeout(() => {
       if (current + 1 >= session.length) {
         const finalScore = scoreRef.current + (correct ? 1 : 0);
-        api.post('/progress/audio/session', { score: finalScore, total: session.length, passed: finalScore >= 12 }).catch(() => {});
+        api.post(sessionEndpoint, { score: finalScore, total: session.length, passed: finalScore >= 12 }).catch(() => {});
         setScore(finalScore);
         setDone(true);
       } else {
@@ -143,10 +153,10 @@ export default function AudioMode() {
             <Typography variant="h4" gutterBottom color={passed ? 'success.main' : 'error.main'}>{passed ? 'Interview Passed!' : 'Keep Practicing'}</Typography>
             <Typography variant="h5" sx={{ mb: 3 }}>{score} / {session.length}</Typography>
             <LinearProgress variant="determinate" value={(score / session.length) * 100}
-              sx={{ mb: 3, height: 12, borderRadius: 6, bgcolor: '#faf5ff', '& .MuiLinearProgress-bar': { bgcolor: passed ? '#a855f7' : '#f43f5e' } }} />
+              sx={{ mb: 3, height: 12, borderRadius: 6, bgcolor: accentBg, '& .MuiLinearProgress-bar': { bgcolor: passed ? accentColor : '#f43f5e' } }} />
             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
               <Button variant="outlined" startIcon={<Home />} onClick={() => navigate('/')}>Dashboard</Button>
-              <Button variant="contained" sx={{ bgcolor: '#a855f7', '&:hover': { bgcolor: '#9333ea' } }} startIcon={<Refresh />} onClick={restart}>Try Again</Button>
+              <Button variant="contained" sx={{ bgcolor: accentColor, '&:hover': { bgcolor: accentColor, filter: 'brightness(0.9)' } }} startIcon={<Refresh />} onClick={restart}>Try Again</Button>
             </Box>
           </CardContent>
         </Card>
@@ -165,10 +175,10 @@ export default function AudioMode() {
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.default' }}>
       <Box sx={{ bgcolor: 'white', borderBottom: '1px solid #e5e7eb', px: 3, py: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
         <IconButton onClick={() => navigate('/')} size="small"><Home /></IconButton>
-        <Typography variant="h6" sx={{ color: '#a855f7', fontWeight: 700, flexGrow: 1 }}>Audio Mode</Typography>
-        <Chip label={`${score} correct`} size="small" sx={{ bgcolor: '#faf5ff', color: '#a855f7' }} />
+        <Typography variant="h6" sx={{ color: accentColor, fontWeight: 700, flexGrow: 1 }}>Audio Mode</Typography>
+        <Chip label={`${score} correct`} size="small" sx={{ bgcolor: accentBg, color: accentColor }} />
         <Tooltip title="Voice settings">
-          <IconButton size="small" onClick={() => setShowSettings((s) => !s)} sx={{ color: showSettings ? '#a855f7' : 'text.secondary' }}>
+          <IconButton size="small" onClick={() => setShowSettings((s) => !s)} sx={{ color: showSettings ? accentColor : 'text.secondary' }}>
             <Settings />
           </IconButton>
         </Tooltip>
@@ -178,9 +188,9 @@ export default function AudioMode() {
           <Alert severity="warning" sx={{ mb: 2 }}>Your browser does not support speech recognition. Try Chrome or Edge for the full experience.</Alert>
         )}
         <Collapse in={showSettings} sx={{ overflow: 'visible' }}>
-          <Card sx={{ mb: 3, border: '1px solid #e9d5ff', overflow: 'visible' }}>
+          <Card sx={{ mb: 3, border: `1px solid ${accentBg}`, overflow: 'visible' }}>
             <CardContent sx={{ overflow: 'visible' }}>
-              <Typography variant="subtitle2" color="#a855f7" fontWeight={700} gutterBottom>
+              <Typography variant="subtitle2" color={accentColor} fontWeight={700} gutterBottom>
                 🎙️ Voice Settings
               </Typography>
               <Divider sx={{ mb: 2 }} />
@@ -254,7 +264,7 @@ export default function AudioMode() {
                     value={rate}
                     min={0.5} max={2.0} step={0.1}
                     onChange={(_e, val) => setRate(val as number)}
-                    sx={{ color: '#a855f7' }}
+                    sx={{ color: accentColor }}
                     marks={[{ value: 0.5, label: '0.5×' }, { value: 1.0, label: '1×' }, { value: 2.0, label: '2×' }]}
                   />
                 </Grid>
@@ -267,14 +277,14 @@ export default function AudioMode() {
                     value={pitch}
                     min={0.5} max={2.0} step={0.1}
                     onChange={(_e, val) => setPitch(val as number)}
-                    sx={{ color: '#a855f7' }}
+                    sx={{ color: accentColor }}
                     marks={[{ value: 0.5, label: 'Low' }, { value: 1.0, label: 'Normal' }, { value: 2.0, label: 'High' }]}
                   />
                 </Grid>
               </Grid>
 
               <Button size="small" variant="outlined" startIcon={<PlayCircle />} onClick={testVoice}
-                sx={{ borderColor: '#a855f7', color: '#a855f7', '&:hover': { bgcolor: '#faf5ff', borderColor: '#9333ea' } }}>
+                sx={{ borderColor: accentColor, color: accentColor, '&:hover': { bgcolor: accentBg, borderColor: accentColor } }}>
                 Test Voice
               </Button>
             </CardContent>
@@ -283,12 +293,12 @@ export default function AudioMode() {
         <Box sx={{ mb: 3 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2" color="text.secondary">Question {current + 1} of {session.length}</Typography>
-            <Typography variant="body2" sx={{ color: '#a855f7' }} fontWeight={600}>{progress}%</Typography>
+            <Typography variant="body2" sx={{ color: accentColor }} fontWeight={600}>{progress}%</Typography>
           </Box>
           <LinearProgress variant="determinate" value={progress}
-            sx={{ borderRadius: 4, height: 8, bgcolor: '#faf5ff', '& .MuiLinearProgress-bar': { bgcolor: '#a855f7' } }} />
+            sx={{ borderRadius: 4, height: 8, bgcolor: accentBg, '& .MuiLinearProgress-bar': { bgcolor: accentColor } }} />
         </Box>
-        <Card sx={{ mb: 3, background: 'linear-gradient(135deg, #a855f7 0%, #c084fc 100%)', textAlign: 'center' }}>
+        <Card sx={{ mb: 3, background: gradient, textAlign: 'center' }}>
           <CardContent sx={{ p: 4 }}>
             <Typography sx={{ fontSize: 64, mb: 1 }}>👮</Typography>
             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', display: 'block', mb: 1 }}>USCIS Officer</Typography>
@@ -297,7 +307,7 @@ export default function AudioMode() {
             </Typography>
           </CardContent>
         </Card>
-        {status === 'speaking' && <Typography align="center" color="#a855f7" sx={{ mb: 2 }}>🔊 Speaking question...</Typography>}
+        {status === 'speaking' && <Typography align="center" sx={{ color: accentColor, mb: 2 }}>🔊 Speaking question...</Typography>}
         {status === 'listening' && <Typography align="center" color="#10b981" sx={{ mb: 2 }}>🎤 Listening... speak your answer now</Typography>}
         {status === 'result' && (
           <Card sx={{ mb: 2, border: `2px solid ${isCorrect ? '#10b981' : '#f43f5e'}`, bgcolor: isCorrect ? '#ecfdf5' : '#fff1f2' }}>
@@ -312,7 +322,7 @@ export default function AudioMode() {
         )}
         {status === 'idle' && (
           <Button variant="contained" fullWidth size="large" startIcon={<VolumeUp />} onClick={askQuestion}
-            sx={{ bgcolor: '#a855f7', '&:hover': { bgcolor: '#9333ea' } }}>Ask Question</Button>
+            sx={{ bgcolor: accentColor, '&:hover': { bgcolor: accentColor, filter: 'brightness(0.9)' } }}>Ask Question</Button>
         )}
       </Box>
     </Box>
