@@ -188,7 +188,7 @@ export default function AudioMode() {
           <Alert severity="warning" sx={{ mb: 2 }}>Your browser does not support speech recognition. Try Chrome or Edge for the full experience.</Alert>
         )}
         <Collapse in={showSettings} sx={{ overflow: 'visible' }}>
-          <Card sx={{ mb: 3, border: `1px solid ${accentBg}`, overflow: 'visible' }}>
+          <Card sx={{ mb: 3, border: `1px solid ${isForm ? '#fcd34d' : '#e9d5ff'}`, overflow: 'visible' }}>
             <CardContent sx={{ overflow: 'visible' }}>
               <Typography variant="subtitle2" color={accentColor} fontWeight={700} gutterBottom>
                 🎙️ Voice Settings

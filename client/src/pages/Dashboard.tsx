@@ -8,6 +8,7 @@ import api from '../api';
 import { ProgressData } from '@shared/index';
 
 const FORM_TOTAL = 57;
+const CIVICS_TOTAL = 128;
 
 interface ModeConfig {
   key: 'education' | 'practice' | 'audio';
@@ -41,7 +42,7 @@ export default function Dashboard() {
   const isForm = questionSet === 'form';
 
   // Civics stats
-  const educationPct = progress ? Math.round((progress.education.lastQuestionIndex / 128) * 100) : 0;
+  const educationPct = progress ? Math.round((progress.education.lastQuestionIndex / CIVICS_TOTAL) * 100) : 0;
   const practiceSessions = progress?.practice?.sessions ?? [];
   const audioSessions = progress?.audio?.sessions ?? [];
 
