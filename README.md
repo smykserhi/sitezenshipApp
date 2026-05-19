@@ -1,3 +1,4 @@
+<img width="1304" height="666" alt="Screenshot 2026-05-19 at 4 09 43 PM" src="https://github.com/user-attachments/assets/5e1c505b-de84-4d9a-9ec0-8280e48e1802" />
 # sitezenshipApp
 
 A lightweight citizenship test web application built with React, TypeScript, Node.js, Express, and MongoDB.
