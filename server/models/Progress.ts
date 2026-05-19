@@ -23,6 +23,12 @@ export interface IProgress extends Document {
   };
   practice: { sessions: IPracticeSession[] };
   audio: { sessions: IAudioSession[] };
+  formEducation: {
+    lastQuestionIndex: number;
+    completedSections: string[];
+  };
+  formPractice: { sessions: IPracticeSession[] };
+  formAudio: { sessions: IAudioSession[] };
 }
 
 const practiceSessionSchema = new Schema<IPracticeSession>({
@@ -48,6 +54,12 @@ const progressSchema = new Schema<IProgress>({
   },
   practice: { sessions: { type: [practiceSessionSchema], default: [] } },
   audio: { sessions: { type: [audioSessionSchema], default: [] } },
+  formEducation: {
+    lastQuestionIndex: { type: Number, default: 0 },
+    completedSections: { type: [String], default: [] },
+  },
+  formPractice: { sessions: { type: [practiceSessionSchema], default: [] } },
+  formAudio: { sessions: { type: [audioSessionSchema], default: [] } },
 });
 
 export default model<IProgress>('Progress', progressSchema);
