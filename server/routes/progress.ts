@@ -15,16 +15,22 @@ router.get('/', authMiddleware, async (req: Request, res: Response): Promise<voi
 });
 
 router.put('/', authMiddleware, async (req: Request, res: Response): Promise<void> => {
-  const { education, practice, audio } = req.body as {
+  const { education, practice, audio, formEducation, formPractice, formAudio } = req.body as {
     education?: { lastQuestionIndex: number; completedSections: string[] };
     practice?: unknown;
     audio?: unknown;
+    formEducation?: { lastQuestionIndex: number; completedSections: string[] };
+    formPractice?: unknown;
+    formAudio?: unknown;
   };
   try {
     const update: Record<string, unknown> = {};
     if (education !== undefined) update.education = education;
     if (practice !== undefined) update.practice = practice;
     if (audio !== undefined) update.audio = audio;
+    if (formEducation !== undefined) update.formEducation = formEducation;
+    if (formPractice !== undefined) update.formPractice = formPractice;
+    if (formAudio !== undefined) update.formAudio = formAudio;
     const progress = await Progress.findOneAndUpdate(
       { userId: req.userId },
       { $set: update },
