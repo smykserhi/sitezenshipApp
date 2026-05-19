@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Card, CardContent, Typography, Button, Grid, LinearProgress, Chip, IconButton } from '@mui/material';
 import { Home, Refresh, CheckCircle, Cancel } from '@mui/icons-material';
 import api from '../api';
-import { Question } from '@shared/index';
+import type { Question } from '../../../types';
 import { useQuestionSet } from '../context/QuestionSetContext';
 
 interface SessionQuestion extends Question {
@@ -119,6 +119,11 @@ export default function PracticeMode() {
         <Card sx={{ mb: 3, background: gradient }}>
           <CardContent sx={{ p: 4 }}>
             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', display: 'block', mb: 1 }}>Question {q.id}</Typography>
+            {isForm && q.formQuestion && (
+              <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.85)', mb: 1.5, fontStyle: 'italic', fontSize: '1.1rem', fontWeight: 500 }}>
+                {q.formQuestion}
+              </Typography>
+            )}
             <Typography variant="h6" sx={{ color: 'white', fontWeight: 600, lineHeight: 1.5 }}>{q.question}</Typography>
           </CardContent>
         </Card>

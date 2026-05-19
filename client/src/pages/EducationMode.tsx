@@ -106,6 +106,11 @@ export default function EducationMode() {
         <Card sx={{ mb: 3, background: gradient }}>
           <CardContent sx={{ p: 4 }}>
             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', display: 'block', mb: 1 }}>Question {q.id}</Typography>
+            {isForm && q.formQuestion && (
+              <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.85)', mb: 1.5, fontStyle: 'italic', fontSize: '1.1rem', fontWeight: 500 }}>
+                {q.formQuestion}
+              </Typography>
+            )}
             <Typography variant="h6" sx={{ color: 'white', fontWeight: 600, lineHeight: 1.5 }}>{q.question}</Typography>
           </CardContent>
         </Card>

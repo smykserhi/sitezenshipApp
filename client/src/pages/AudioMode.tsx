@@ -302,6 +302,11 @@ export default function AudioMode() {
           <CardContent sx={{ p: 4 }}>
             <Typography sx={{ fontSize: 64, mb: 1 }}>👮</Typography>
             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)', display: 'block', mb: 1 }}>USCIS Officer</Typography>
+            {status !== 'idle' && isForm && q.formQuestion && (
+              <Typography variant="h6" sx={{ color: 'rgba(255,255,255,0.85)', mb: 1.5, fontStyle: 'italic', fontSize: '1.1rem', fontWeight: 500 }}>
+                {q.formQuestion}
+              </Typography>
+            )}
             <Typography variant="h6" sx={{ color: 'white', fontWeight: 600, lineHeight: 1.5 }}>
               {status === 'idle' ? 'Press "Ask Question" to begin' : q.question}
             </Typography>
