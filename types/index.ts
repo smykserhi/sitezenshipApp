@@ -5,6 +5,8 @@ export interface Question {
   question: string;
   answers: string[];
   fakeAnswers: string[];
+  formItem?: string;
+  formQuestion?: string;
 }
 
 export interface AuthUser {
@@ -42,4 +44,10 @@ export interface ProgressData {
   };
   practice: { sessions: PracticeSession[] };
   audio: { sessions: AudioSession[] };
+  formEducation?: {
+    lastQuestionIndex: number;
+    completedSections: string[];
+  };
+  formPractice?: { sessions: PracticeSession[] };
+  formAudio?: { sessions: AudioSession[] };
 }
